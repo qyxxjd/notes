@@ -17,22 +17,33 @@
 
     // …
 
-    // 通过 Proxy.newProxyInstance 创建一个 interface 的动态代理
-    // 当调用 interface 中的某个请求方法时，会被这个代理拦截
-    return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[] { service },
+    // Proxy.newProxyInstance：该方法生成一个动态代理类实例。
+    //
+    // 参数：
+    // ClassLoader：类装载器
+    // Class[]：一组接口
+    // InvocationHandler：动态代理类关联的调用处理器，这个接口只有一个 invoke 方法，用于集中处理在动态代理类对象上的方法调用，通常在该方法中实现对委托类的代理访问。
+    return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[] { service },
         new InvocationHandler() {
           //获取当前平台（Android or Java8 or default）
           private final Platform platform = Platform.get();
 
+	  /**
+	   * invoke 方法负责集中处理动态代理类上的所有方法调用
+	   *
+	   * proxy：代理类实例
+	   * method：被调用的方法对象
+	   * args：调用参数
+	   */
           @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             // …
 
-	          // 通过invoke的参数method 构建一个ServiceMethod对象
-	          // loadServiceMethod方法会先从缓存(ConcurrentHashMap)中获取，如果没有再进行创建，然后缓存
+	    // 通过参数 method 构建一个 ServiceMethod 对象
+	    // loadServiceMethod 方法会先从缓存(ConcurrentHashMap)中获取，如果没有再进行创建，然后缓存
             ServiceMethod<Object, Object> serviceMethod = (ServiceMethod<Object, Object>) loadServiceMethod(method);
 	    
-            // 通过ServiceMethod 和 invoke的参数args 创建OkHttpCall
-            // OkHttpCall是对OkHttp的封装，内部包含OkHttp需要的所有参数
+            // 通过 ServiceMethod 和参数 args 创建 OkHttpCall
+            // OkHttpCall 是对 OkHttp 的封装，内部包含网络请求需要的所有参数
             OkHttpCall<Object> okHttpCall = new OkHttpCall<>(serviceMethod, args);
             return serviceMethod.callAdapter.adapt(okHttpCall);
           }
@@ -61,6 +72,9 @@
     return result;
   }
 ```
+
+动态代理扩展
+
 
 #### ServiceMethod.java
 
