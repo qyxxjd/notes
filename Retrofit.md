@@ -141,3 +141,91 @@
   }
 ```
 
+#### `Retrofit`相关的设计模式
+
+###### Builder模式
+
+```java
+retrofit = new Retrofit.Builder().baseUrl(PrivateConstant.FACE_URL_PREFIX)
+                                 .client(okHttpClient)
+                                 .addConverterFactory(GsonConverterFactory.create(gson))
+                                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                                 .build();
+```
+
+###### 外观模式、动态代理
+
+```java
+  // 外观模式
+  public <T> T create(final Class<T> service) {
+    // 动态代理
+    return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[] { service },
+        new InvocationHandler() {
+	    // ...
+            return serviceMethod.callAdapter.adapt(okHttpCall);
+          }
+        });
+  }
+```
+
+###### 适配器模式
+
+`CallAdapter` 、 `Converter` 这两个接口的实现类都是适配器模式
+
+
+###### 装饰者模式
+
+```java
+final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
+  static final class ExecutorCallbackCall<T> implements Call<T> {
+    final Executor callbackExecutor;
+    final Call<T> delegate;
+
+    ExecutorCallbackCall(Executor callbackExecutor, Call<T> delegate) {
+      this.callbackExecutor = callbackExecutor;
+      this.delegate = delegate;
+    }
+    
+    @Override public void enqueue(final Callback<T> callback) {
+      delegate.enqueue( ... );
+    }
+    
+    @Override public boolean isExecuted() {
+      return delegate.isExecuted();
+    }
+
+    @Override public Response<T> execute() throws IOException {
+      return delegate.execute();
+    }
+
+    @Override public void cancel() {
+      delegate.cancel();
+    }
+
+    @Override public boolean isCanceled() {
+      return delegate.isCanceled();
+    }
+
+    @Override public Request request() {
+      return delegate.request();
+    }
+  }
+}
+```
+
+###### 策略模式
+
+```java
+final class RxJava2CallAdapter<R> implements CallAdapter<R, Object> {
+  // 策略模式
+  @Override public Object adapt(Call<R> call) {
+    Observable<Response<R>> responseObservable = isAsync
+        // 异步请求的实现类
+        ? new CallEnqueueObservable<>(call)
+	// 同步请求的实现类
+        : new CallExecuteObservable<>(call);
+    // ...
+    return observable;
+  }
+}
+```
