@@ -11,7 +11,7 @@ public static boolean isOnBackgroundThread() {
 
 #### `EditText` 不自动获取焦点
 
-在父Layout中添加：
+在父 `Layout` 中添加：
 ```java
 android:focusable="true"
 android:focusableInTouchMode="true"
@@ -67,7 +67,6 @@ try{
 `OnTrimMemory` 方法来自 `ComponentCallbacks2` 接口，`Android 4.0` 之后提供的 `API`，如果需要兼容 `Android 4.0` 以下的版本使用 `onLowMemory`。
 实现此接口的类都可以处理此方法，比如 `Application、Activity、Fragment、Service、ContentProvider`。
 ```java
-// Application、Activity、Fragment、Service、ContentProvider
 @Override public void onTrimMemory(int level) {
     switch (level) {
         case Activity.TRIM_MEMORY_UI_HIDDEN:
