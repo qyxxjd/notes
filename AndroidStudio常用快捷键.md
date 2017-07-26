@@ -14,7 +14,7 @@
 | ----- | ----- | ----- |
 | `Alt` + `1` | `Option` + `1` | 快速打开或隐藏工程面板 |
 | `Ctrl` + `H` | `Command` + `H` | 显示类继承结构图 |
-| `Ctrl` + `Q` | `Command` + `Q` | 显示注释文档 |
+| `Ctrl` + `Q` | `Control` + `J` | 显示注释文档 |
 | `Ctrl` + `U` | `Command` + `U` | 打开当前类的父类或者实现的接口 |
 | `Ctrl` + `Alt` + `H` | `Command` + `Alt` + `H` | 查看调用关系 |
 | `Ctrl` + `F12` | `Command` + `F12` | 显示当前文件的结构 |
