@@ -4,8 +4,9 @@
 
 | Windows | Mac | 说明 |
 | ----- | ----- | ----- |
-| `Ctrl` + `Shift` + `F10` | `Command` + `Shift` + `F10` | 运行 |
-| `Ctrl` + `Shift` + `F9` | `Command` + `Shift` + `F9` | Debug运行 |
+| `Ctrl` + `F9` | `Command` + `F9` | 编译 |
+| `Shift` + `F10` | `Control` + `R` | 编译并运行 |
+| `Shift` + `F9` | `Control` + `D` | Debug运行 |
 
 
 #### 视图
