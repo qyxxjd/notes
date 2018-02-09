@@ -19,7 +19,7 @@ git tag -d xxx
 Fork项目和源项目代码同步
 ```git
 // 添加一个别名为 target 的地址, 指向目标项目
-git remote add target git@gitlab.ops.xkeshi.so:android_cashier/mvn-repo.git
+git remote add target xxx.git
 git fetch target 
 git checkout dev
 git merge target/dev
