@@ -34,7 +34,7 @@ extracting android-info.txt (0 MB) to RAM...
 --------------------------------------------       
 Bootloader Version...: angler-03.79
 Baseband Version.....: angler-03.87
-Serial Number........: ENU7N16225000534
+Serial Number........: ************
 --------------------------------------------       
 Checking product                                   OKAY [  0.020s]
 Checking version-bootloader                        OKAY [  0.021s]
@@ -54,7 +54,7 @@ extracting vendor.img (188 MB) to disk... took 1.360s
 archive does not contain 'vendor.sig'
 mke2fs 1.43.3 (04-Sep-2016)
 Creating filesystem with 6694270 4k blocks and 1676080 inodes
-Filesystem UUID: d754f478-772c-4db6-a801-df90069abcb6
+Filesystem UUID: ********************************************
 Superblock backups stored on blocks: 
 	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208, 
 	4096000
