@@ -1,3 +1,9 @@
+#### 下载文件
+
+```shell
+ffmpeg -i http://xxx output.xxx
+```
+
 #### 视频文件转GIF
 
 ```shell
