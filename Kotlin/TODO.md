@@ -5,3 +5,6 @@
 - where
 - inline
 - reified
+- inline operator
+- operator
+- crossinline
