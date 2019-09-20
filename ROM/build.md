@@ -58,7 +58,9 @@ make -j4
 ```
 
 
-#### 编译源码，生成Android项目工程
+#### 编译源码，生成 Android Studio 项目工程
+
+> 生成 android.ipr 和 android.iml 文件
 
 ```
 mmm development/tools/idegen/
