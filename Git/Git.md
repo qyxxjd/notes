@@ -32,6 +32,8 @@ git config --global user.name Classic
 git config --global user.email pgliubin@gmail.com
 // 配置大小写敏感
 git config --global core.ignorecase false
+// 提交文件最大值
+git config --global http.postBuffer 524288000
 // HTTP代理
 git config --global http.proxy "http://127.0.0.1:8080"
 git config --global https.proxy "http://127.0.0.1:8080"
