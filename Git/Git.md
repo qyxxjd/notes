@@ -24,3 +24,21 @@ git fetch target
 git checkout dev
 git merge target/dev
 ```
+
+全局配置
+```git
+// 用户信息
+git config --global user.name Classic
+git config --global user.email pgliubin@gmail.com
+// 配置大小写敏感
+git config --global core.ignorecase false
+// HTTP代理
+git config --global http.proxy "http://127.0.0.1:8080"
+git config --global https.proxy "http://127.0.0.1:8080"
+// socks5代理
+git config --global http.proxy "socks5://127.0.0.1:1080"
+git config --global https.proxy "socks5://127.0.0.1:1080"
+// 取消代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
