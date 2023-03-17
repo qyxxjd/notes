@@ -1,0 +1,82 @@
+
+with()
+with方法传入的参数可以是Context、Activity、Fragment、FragmentActiviy
+
+如果是在子线程调用with方法,或者传入的是Application Context,请求和Application的生命周期同步
+
+RequestManagerRetriever
+根据传入Context的类型有不同的实现
+FragmentActivity：方法get(FragmentActivity activity)调用了方法supportFragmentGet(activity, fm)，后者返回的对象类型是SupportRequestManagerFragment 。
+SupportRequestManagerFragment 是一个无界面的Fragment，作用是把图片请求和Activity生命周期进行关联。
+
+load()
+最终都会返回一个DrawableTypeRequest ，继承自DrawableRequestBuilder
+
+into()
+必须在主线程中调用，否则会抛出异常
+ImageView通过into方法被封装成一个ImageViewTarget，实现Target接口
+
+Target接口
+继承自LifecycleListener，内部有onStart、onStop、onDestroy三个方法，和Fragment对应的三个方法同步
+通过setRequest方法绑定请求，内部调用View.setTag方法，将request对象设置到tag。
+setRequest之前会先通过getRequest判断是否已绑定请求，如果绑定，取消请求、释放资源，然后绑定新的请求。
+
+图片的缓存
+两级内存缓存，第一级是LruCache，第二级是ActiveCache(缓存正在弱引用的图片)。
+比一般内存缓存额外多一级缓存的意义在于，当内存不足时清理cache中的资源时，不会对使用中的图片造成影响。
+通过ReferenceQueue监测弱引用的回收，然后用Handler.IdleHandler在空闲时将被回收的引用从ActiveCache中移除。
+
+图片的加载
+Engine: 负责任务创建，发起，回调，资源的管理
+Engine.load方法先通过loadFromCache从LruCache内获取，如果找到就从LruCache中移除并放入ActiveCache中。如果没有再通过loadFromActiveResources从ActiveCache里找，如果没有去Map<Key, EngineJob>里找，找到就addCallback，这样如果有多个地方同时请求同一张图片的话，只会生成一个加载任务，并都能收到回调
+如果找不到最终会生成EngineJob、DecodeJob和EngineRunnable，通过engineJob.start(engineRunnable)来进行实际的加载。
+
+Glide有三种加载数据：
+ResourceCacheGenerator：从处理过的缓存加载数据
+DataCacheGenerator：从原始缓存加载数据
+SourceGenerator：从数据源请求数据，如网络请求
+Glide的磁盘缓存可以选择缓存原始图片，缓存处理过的图片。这三个Generator就分别对应处理过的图片缓存，原始图片缓存，和数据源加载。
+
+
+
+先从cache中寻找资源，如果找到则将其从cache中移除并放入activeResources中，否则从activeResources中寻找。
+cache是LruResourceCache对象，作为资源的LRU缓存；activeResources是以弱引用为值的Map，用于缓存使用中的资源。
+比一般内存缓存额外多一级缓存的意义在于，当内存不足时清理cache中的资源时，不会对使用中的Bitmap造成影响。
+若再次寻找失败，则创建EngineJob对象并调用其start方法。
+
+在EngineRunnable的run方法中进行编码，根据缓存策略调用decodeFromCache或者decodeFromSource。
+
+编码前需要先通过DataFetcher访问网络获得文件流。接口DataFetcher的实现类根据配置而不同，设置为通过OkHttp3进行网络通信的情况下，该实现类为OkHttpStreamFetcher。
+之后根据需要将文件流写入磁盘缓存，再对文件流进行编码。
+
+编码过程中通过设置采样率缩放图片，降低内存占用，提高加载性能。
+编码之后通过transformEncodeAndTranscode方法进行转换处理。transform方法调用了Transformation的transform方法。
+Transformation是接口；BitmapTransformation实现了该接口但留下了另一个抽象方法transform；CenterCrop和FitCenter两个类继承了BitmapTransformation并实现了抽象方法transform。
+
+由BitmapPool提供一个Bitmap作为下一步的Canvas载体。BitmapPool的实现类是LruBitmapPool，顾名思义是一个基于LRU方式的Bitmap缓存池，用于Bitmap的复用。
+
+
+
+
+
+	将ImageView封装成一个ImageViewTarget，实现Target接口，Target接口继承自LifecycleListener，内部有onStart、onStop、onDestroy三个方法，和Activity/Fragment生命周期对应
+	通过setRequest方法绑定请求，内部调用View.setTag方法，将request对象设置到tag
+	setRequest之前会先通过getRequest判断是否已绑定请求，如果绑定，取消请求、释放资源，然后绑定新的请求
+	图片的加载通过Engine进行管理，load方法先LruCache内获取，如果找到就从LruCache中移除并放入ActiveCache中。
+	如果没有再从ActiveCache里找，如果没有去Map<Key, EngineJob>里找，找到就addCallback，这样如果有多个地方同时请求同一张图片的话，只会生成一个加载任务，并都能收到回调
+	如果找不到最终会生成EngineJob、DecodeJob和EngineRunnable，通过engineJob.start(engineRunnable)来进行实际的加载。
+
+	Glide有三种加载数据：
+	ResourceCacheGenerator：从处理过的缓存加载数据
+	DataCacheGenerator：从原始缓存加载数据
+	SourceGenerator：从数据源请求数据，如网络请求
+	Glide的磁盘缓存可以选择缓存原始图片，缓存处理过的图片。这三个Generator就分别对应处理过的图片缓存，原始图片缓存，和数据源加载。
+
+	图片的缓存
+	两级内存缓存，第一级是LruCache，第二级是ActiveCache(缓存正在弱引用的图片)。
+	比一般内存缓存额外多一级缓存的意义在于，当内存不足时清理cache中的资源时，不会对使用中的图片造成影响。
+	通过ReferenceQueue监测弱引用的回收，然后用Handler.IdleHandler在空闲时将被回收的引用从ActiveCache中移除。
+	
+	扩展：
+	LRU：移除B，因为它是最长时间未被使用的。
+	LFU：移除D，因为只被使用了一次，是最不经常使用的。
